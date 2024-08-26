@@ -15,14 +15,14 @@ PrinterInstance = '1.2.840.10008.5.1.1.17'
 
 #Tunable parameters：
 AE_Adress = '192.168.88.236'
-AE_Port = '104'
+AE_Port = 104
 DcmPath = 'YourFilm.dcm'    #path of dcm file
 setUID = ''   
 setBoxUID = ''                  #If these two UID have values, they will be sent continuously using the UID you set; 
                                 #If it is empty, call the library to generate it, theoretically it is calculated from the local timestamp, who knows ? :)
                                 #reference value 1.2.276.0.7230010.3.1.4.8323328.929.1723453680.299023
-setSize = '14INX17IN'   #of cos sizes
-sentTime = 3  #(Repeat) Send several tasks
+setSize = '10INX12IN'   #of cos sizes
+sentTime = 1  #(Repeat) Send several tasks
 timeSet = 0   #Interval time
 
 
@@ -76,12 +76,14 @@ def build_film_box(sessionInstanceUID):
     attr_list.ImageDisplayFormat = 'STANDARD\\1,1'
     attr_list.FilmOrientation = 'PORTRAIT'
     attr_list.FilmSizeID = setSize
+    
 
     # Can only contain a single item, is a reference to the *Film Session*
     attr_list.ReferencedFilmSessionSequence = [Dataset()]
     item = attr_list.ReferencedFilmSessionSequence[0]
     item.ReferencedSOPClassUID = BasicFilmSession
     item.ReferencedSOPInstanceUID = sessionInstanceUID
+    
 
     return attr_list
 
@@ -109,6 +111,7 @@ def build_image_box(im):
     item.SamplesPerPixel = im.SamplesPerPixel
     item.PhotometricInterpretation = im.PhotometricInterpretation
     item.Rows = im.Rows
+    item.SmoothingType = ''
     item.Columns = im.Columns
     item.BitsAllocated = im.BitsAllocated
     item.BitsStored = im.BitsStored
@@ -135,7 +138,7 @@ def send():
 
     ae = AE()
     ae.add_requested_context(BasicGrayscalePrintManagementMeta)
-    assoc = ae.associate("192.168.88.236", 104, ae_title=b'PRINTSCP', evt_handlers=handlers)
+    assoc = ae.associate(AE_Adress, AE_Port, ae_title=b'PRINTSCP', evt_handlers=handlers)
 
     if assoc.is_established:
     # Step 1: Check the status of the printer
@@ -260,6 +263,6 @@ i=0
 
 
 while i<sentTime :
-    timer = threading.Timer(timeSet,send())
+    timer = threading.Timer(timeSet,send)
     timer.start()
     i=i+1
