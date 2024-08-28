@@ -6,6 +6,7 @@ from pydicom.dataset import Dataset
 from pydicom.uid import generate_uid
 from pynetdicom import AE, evt, debug_logger
 
+#project Set:
 BasicGrayscalePrintManagementMeta = '1.2.840.10008.5.1.1.9'
 BasicFilmSession = '1.2.840.10008.5.1.1.1'
 BasicFilmBox = '1.2.840.10008.5.1.1.2'
@@ -13,9 +14,14 @@ BasicGrayscaleImageBox = '1.2.840.10008.5.1.1.4'
 Printer = '1.2.840.10008.5.1.1.16'
 PrinterInstance = '1.2.840.10008.5.1.1.17'
 
-#Tunable parameters：
+#Target AE:(revice)
 AE_Adress = '192.168.88.236'
 AE_Port = 104
+AE_Title = 'PRINTSCP' 
+
+#Local AE:(send)
+Local_Title = 'DasTest' 
+Imp_Ver_Name = 'DasDicom236'
 DcmPath = 'YourFilm.dcm'    #path of dcm file
 setUID = ''   
 setBoxUID = ''                  #If these two UID have values, they will be sent continuously using the UID you set; 
@@ -137,8 +143,12 @@ def send():
     handlers = [(evt.EVT_N_EVENT_REPORT, handle_n_er)]
 
     ae = AE()
+    ae.ae_title = Local_Title
+    ae.implementation_version_name = Imp_Ver_Name
+    #ae.implementation_class_uid = ''
+    #ae._implementation_uid = ''    
     ae.add_requested_context(BasicGrayscalePrintManagementMeta)
-    assoc = ae.associate(AE_Adress, AE_Port, ae_title=b'PRINTSCP', evt_handlers=handlers)
+    assoc = ae.associate(AE_Adress, AE_Port, ae_title=str.encode(AE_Title), evt_handlers=handlers)
 
     if assoc.is_established:
     # Step 1: Check the status of the printer
